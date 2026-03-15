@@ -1,7 +1,3 @@
-Here's a full README for your EMI Calculator:
-
----
-
 # 🇮🇳 Bharat EMI Calculator
 
 A beautiful, fully offline, single-file HTML EMI Calculator built for Indian users with 20+ banks, loan application form, prepayment planner, and amortization schedule.
