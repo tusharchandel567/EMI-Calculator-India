@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EMI Calculator – Indian Banks</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f5f3ee;--surface:#fff;--card:#fff;--border:#e2ddd6;
+  --text:#1a1612;--muted:#7a7060;--accent:#c84b2f;--accent2:#e8843a;
+  --blue:#2563a8;--green:#1a7a4a;--gold:#c49a1a;
+  --grad:linear-gradient(135deg,#c84b2f,#e8843a);
+}
+body{background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif;min-height:100vh}
+/* ---- HEADER ---- */
+.header{background:var(--text);color:#fff;padding:1.5rem 2rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+.header h1{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700;letter-spacing:-.01em}
+.header h1 span{color:#e8843a}
+.header-sub{font-size:.78rem;color:#aaa;font-weight:300;margin-top:.2rem}
+.header-badge{background:rgba(232,132,58,.15);border:1px solid rgba(232,132,58,.3);color:#e8843a;padding:.3rem .8rem;border-radius:20px;font-size:.75rem;font-weight:500}
+
+/* ---- LAYOUT ---- */
+.wrap{max-width:1100px;margin:0 auto;padding:2rem 1.5rem 4rem}
+.main-grid{display:grid;grid-template-columns:380px 1fr;gap:1.5rem;align-items:start}
+@media(max-width:800px){.main-grid{grid-template-columns:1fr}}
+
+/* ---- CARDS ---- */
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.5rem}
+.card+.card{margin-top:1.2rem}
+.sec-title{font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:1.1rem;display:flex;align-items:center;gap:.5rem}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* ---- LOAN TYPE TABS ---- */
+.loan-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:1.3rem}
+.ltab{background:#f8f6f3;border:1.5px solid var(--border);border-radius:12px;padding:.65rem .3rem;text-align:center;cursor:pointer;transition:.2s;font-size:.78rem;color:var(--muted);font-family:'Outfit',sans-serif}
+.ltab:hover{border-color:var(--accent)}
+.ltab.active{background:linear-gradient(135deg,rgba(200,75,47,.08),rgba(232,132,58,.08));border-color:var(--accent);color:var(--accent);font-weight:500}
+.ltab-icon{font-size:1.3rem;display:block;margin-bottom:.25rem}
+
+/* ---- FORM FIELDS ---- */
+.field{margin-bottom:1.1rem}
+.field-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:.45rem}
+.field-label{font-size:.82rem;color:var(--muted);font-weight:400}
+.field-val{font-size:.95rem;font-weight:600;color:var(--text);background:var(--bg);padding:.2rem .6rem;border-radius:7px;border:1px solid var(--border);min-width:90px;text-align:right}
+input[type=range]{width:100%;-webkit-appearance:none;height:5px;border-radius:3px;background:linear-gradient(90deg,var(--accent) var(--pct,50%),#ddd var(--pct,50%));outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--accent);border:3px solid #fff;box-shadow:0 2px 8px rgba(200,75,47,.35);cursor:pointer}
+.range-labels{display:flex;justify-content:space-between;font-size:.68rem;color:#bbb;margin-top:.25rem}
+.field-direct{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-top:.7rem}
+.field-direct input{padding:.5rem .7rem;border:1.5px solid var(--border);border-radius:9px;font-size:.88rem;font-family:'Outfit',sans-serif;background:#fafaf9;color:var(--text);transition:.15s;width:100%}
+.field-direct input:focus{outline:none;border-color:var(--accent)}
+.field-direct label{font-size:.7rem;color:var(--muted);display:block;margin-bottom:.2rem}
+
+/* ---- EXTRA PARAMS ---- */
+.extras{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-bottom:1.1rem}
+.extras select,.extras input{width:100%;padding:.5rem .7rem;border:1.5px solid var(--border);border-radius:9px;font-size:.82rem;font-family:'Outfit',sans-serif;background:#fafaf9;color:var(--text)}
+.extras select:focus,.extras input:focus{outline:none;border-color:var(--accent)}
+.extras label{font-size:.7rem;color:var(--muted);display:block;margin-bottom:.2rem}
+
+/* ---- BUTTON ---- */
+.btn-calc{width:100%;padding:.9rem;border:none;border-radius:12px;background:var(--grad);color:#fff;font-size:1rem;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;letter-spacing:.02em;transition:.15s;margin-top:.4rem;position:relative;overflow:hidden}
+.btn-calc:hover{opacity:.9;transform:translateY(-1px);box-shadow:0 8px 25px rgba(200,75,47,.3)}
+.btn-calc:active{transform:scale(.98)}
+
+/* ---- RESULT BOX ---- */
+.result-hero{background:var(--text);color:#fff;border-radius:16px;padding:1.5rem;text-align:center;margin-bottom:1.2rem;position:relative;overflow:hidden}
+.result-hero::before{content:'';position:absolute;top:-40px;right:-40px;width:130px;height:130px;background:rgba(232,132,58,.12);border-radius:50%}
+.result-hero::after{content:'';position:absolute;bottom:-30px;left:-20px;width:90px;height:90px;background:rgba(200,75,47,.1);border-radius:50%}
+.emi-lbl{font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:#aaa;margin-bottom:.4rem}
+.emi-amount{font-family:'Playfair Display',serif;font-size:clamp(2.2rem,5vw,3rem);font-weight:900;color:#fff;position:relative;z-index:1}
+.emi-amount span{font-size:1.5rem;color:#e8843a}
+.emi-period{font-size:.8rem;color:#888;margin-top:.3rem}
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin-top:1rem;position:relative;z-index:1}
+.stat-box{background:rgba(255,255,255,.06);border-radius:10px;padding:.7rem .5rem;text-align:center;border:1px solid rgba(255,255,255,.08)}
+.stat-v{font-size:.95rem;font-weight:600;color:#fff;margin-bottom:.15rem}
+.stat-l{font-size:.65rem;color:#888;text-transform:uppercase;letter-spacing:.06em}
+
+/* ---- DONUT ---- */
+.chart-row{display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap}
+.donut-wrap{position:relative;flex-shrink:0}
+.donut-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center}
+.donut-pct{font-size:1.3rem;font-weight:700;color:var(--text)}
+.donut-sub{font-size:.65rem;color:var(--muted)}
+.legend{flex:1;min-width:130px}
+.leg-item{display:flex;align-items:center;gap:.6rem;font-size:.82rem;margin-bottom:.6rem}
+.leg-dot{width:12px;height:12px;border-radius:3px;flex-shrink:0}
+.leg-val{font-weight:600;margin-left:auto;color:var(--text)}
+
+/* ---- BANK TABLE ---- */
+.filter-bar{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem;align-items:center}
+.filter-bar input{flex:1;min-width:140px;padding:.4rem .8rem;border:1.5px solid var(--border);border-radius:9px;font-size:.82rem;font-family:'Outfit',sans-serif;background:#fafaf9}
+.filter-bar input:focus{outline:none;border-color:var(--accent)}
+.filter-btn{padding:.4rem .9rem;border-radius:9px;font-size:.78rem;cursor:pointer;border:1.5px solid var(--border);background:none;color:var(--muted);font-family:'Outfit',sans-serif;transition:.15s;white-space:nowrap}
+.filter-btn.active{background:rgba(200,75,47,.08);border-color:var(--accent);color:var(--accent)}
+.bank-table{width:100%;border-collapse:collapse;font-size:.83rem}
+.bank-table th{padding:.55rem .7rem;text-align:left;color:var(--muted);font-weight:500;font-size:.7rem;letter-spacing:.07em;text-transform:uppercase;border-bottom:1.5px solid var(--border);white-space:nowrap}
+.bank-table td{padding:.6rem .7rem;border-bottom:1px solid #f0ece6;vertical-align:middle}
+.bank-table tr:hover td{background:#faf8f5}
+.bank-table tr.best td{background:rgba(26,122,74,.04)}
+.bank-table tr.best td:first-child{border-left:3px solid var(--green)}
+.bank-name{font-weight:600;color:var(--text);display:block}
+.bank-type{font-size:.68rem;color:var(--muted);margin-top:.1rem}
+.badge{display:inline-block;padding:.15rem .5rem;border-radius:6px;font-size:.68rem;font-weight:600;margin-left:.4rem}
+.badge-best{background:rgba(26,122,74,.12);color:var(--green)}
+.badge-pop{background:rgba(37,99,168,.12);color:var(--blue)}
+.badge-pvt{background:rgba(196,154,26,.12);color:var(--gold)}
+.emi-bar{background:#f0ece6;border-radius:3px;height:4px;margin-top:.3rem;overflow:hidden}
+.emi-bar-fill{height:4px;border-radius:3px;background:var(--grad);transition:.5s}
+.saving{font-size:.72rem;color:var(--green);font-weight:500;margin-top:.15rem}
+.apply-btn{padding:.3rem .7rem;border:1.5px solid var(--accent);border-radius:7px;background:none;color:var(--accent);font-size:.75rem;font-weight:500;cursor:pointer;font-family:'Outfit',sans-serif;transition:.15s;white-space:nowrap}
+.apply-btn:hover{background:var(--accent);color:#fff}
+.sort-btn{background:none;border:none;cursor:pointer;color:var(--muted);font-size:.8rem;margin-left:.2rem;vertical-align:middle}
+.sort-btn.active{color:var(--accent)}
+
+/* ---- LOAN APPLICATION FORM ---- */
+.app-form{display:none}
+.app-form.open{display:block}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
+@media(max-width:560px){.form-grid{grid-template-columns:1fr}}
+.form-group{display:flex;flex-direction:column;gap:.25rem}
+.form-group label{font-size:.75rem;color:var(--muted);font-weight:500}
+.form-group input,.form-group select,.form-group textarea{padding:.55rem .75rem;border:1.5px solid var(--border);border-radius:9px;font-size:.85rem;font-family:'Outfit',sans-serif;background:#fafaf9;color:var(--text);transition:.15s}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:var(--accent);background:#fff}
+.form-group.full{grid-column:1/-1}
+.form-section-lbl{grid-column:1/-1;font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding-top:.4rem;font-weight:600}
+.form-actions{grid-column:1/-1;display:flex;gap:.6rem;margin-top:.3rem}
+.btn-submit{flex:1;padding:.75rem;border:none;border-radius:10px;background:var(--grad);color:#fff;font-size:.9rem;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif}
+.btn-reset{padding:.75rem 1.2rem;border:1.5px solid var(--border);border-radius:10px;background:none;color:var(--muted);font-size:.9rem;cursor:pointer;font-family:'Outfit',sans-serif}
+.eligibility-bar{margin:.8rem 0;background:#f0ece6;border-radius:6px;height:10px;overflow:hidden}
+.elig-fill{height:10px;border-radius:6px;transition:.6s}
+.elig-row{display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:.3rem}
+.toast{position:fixed;bottom:2rem;right:2rem;background:var(--text);color:#fff;padding:.85rem 1.4rem;border-radius:12px;font-size:.88rem;transform:translateY(100px);opacity:0;transition:.4s;z-index:999;max-width:320px;border-left:4px solid var(--accent2)}
+.toast.show{transform:translateY(0);opacity:1}
+
+/* ---- AMORT ---- */
+.amort-tabs{display:flex;gap:.4rem;margin-bottom:.9rem}
+.atab{padding:.38rem .85rem;border-radius:8px;font-size:.78rem;cursor:pointer;border:1.5px solid var(--border);background:none;color:var(--muted);font-family:'Outfit',sans-serif;transition:.15s}
+.atab.active{background:rgba(200,75,47,.08);border-color:var(--accent);color:var(--accent);font-weight:500}
+.amort-table{width:100%;border-collapse:collapse;font-size:.82rem}
+.amort-table th{padding:.45rem .7rem;text-align:right;color:var(--muted);font-weight:500;font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;border-bottom:1.5px solid var(--border)}
+.amort-table th:first-child{text-align:left}
+.amort-table td{padding:.5rem .7rem;border-bottom:1px solid #f0ece6;text-align:right}
+.amort-table td:first-child{text-align:left;font-weight:500}
+.amort-table tr:last-child td{font-weight:600;background:#faf8f5;border-bottom:none}
+.progress-col{width:80px}
+.mini-bar{background:#f0ece6;border-radius:3px;height:4px;margin-top:.3rem}
+.mini-fill{height:4px;border-radius:3px;background:var(--grad)}
+
+/* ---- PREPAYMENT ---- */
+.prepay-section{margin-top:.6rem}
+.prepay-row{display:grid;grid-template-columns:1fr 1fr 80px;gap:.6rem;align-items:end;margin-bottom:.6rem}
+.prepay-row input,.prepay-row select{padding:.5rem .7rem;border:1.5px solid var(--border);border-radius:9px;font-size:.82rem;font-family:'Outfit',sans-serif;background:#fafaf9}
+.prepay-row input:focus,.prepay-row select:focus{outline:none;border-color:var(--accent)}
+.prepay-add{padding:.5rem .8rem;border:none;border-radius:9px;background:var(--grad);color:#fff;font-size:.82rem;cursor:pointer;font-family:'Outfit',sans-serif;white-space:nowrap}
+.prepay-list{display:flex;flex-direction:column;gap:.4rem;margin-top:.4rem}
+.prepay-item{display:flex;align-items:center;justify-content:space-between;background:#f8f6f3;border-radius:8px;padding:.4rem .75rem;font-size:.8rem}
+.prepay-del{background:none;border:none;cursor:pointer;color:#ccc;font-size:.9rem;padding:.1rem .3rem}
+.prepay-del:hover{color:var(--accent)}
+.savings-box{background:linear-gradient(135deg,rgba(26,122,74,.07),rgba(26,122,74,.03));border:1px solid rgba(26,122,74,.2);border-radius:12px;padding:1rem 1.2rem;margin-top:.8rem}
+.savings-title{font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--green);font-weight:600;margin-bottom:.6rem}
+.savings-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
+.sv{background:#fff;border-radius:8px;padding:.6rem .75rem;border:1px solid rgba(26,122,74,.12)}
+.sv-val{font-size:.95rem;font-weight:700;color:var(--green)}
+.sv-lbl{font-size:.68rem;color:var(--muted);margin-top:.1rem}
+
+/* TABS NAV */
+.tabs-nav{display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:1.2rem;overflow-x:auto}
+.tab-btn{padding:.6rem 1.1rem;border:none;background:none;font-family:'Outfit',sans-serif;font-size:.85rem;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:.15s;font-weight:400}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:500}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>भारत <span>EMI</span> Calculator</h1>
+    <div class="header-sub">All major Indian banks · Loan application · Prepayment planner</div>
+  </div>
+  <div class="header-badge">🇮🇳 20+ Indian Banks</div>
+</div>
+
+<div class="wrap">
+  <div class="main-grid">
+
+    <!-- LEFT: INPUTS -->
+    <div>
+      <div class="card">
+        <div class="sec-title">Loan Type</div>
+        <div class="loan-tabs">
+          <div class="ltab active" onclick="setType(this,'home')"><span class="ltab-icon">🏠</span>Home Loan</div>
+          <div class="ltab" onclick="setType(this,'car')"><span class="ltab-icon">🚗</span>Car Loan</div>
+          <div class="ltab" onclick="setType(this,'personal')"><span class="ltab-icon">💼</span>Personal</div>
+          <div class="ltab" onclick="setType(this,'education')"><span class="ltab-icon">🎓</span>Education</div>
+          <div class="ltab" onclick="setType(this,'gold')"><span class="ltab-icon">🪙</span>Gold Loan</div>
+          <div class="ltab" onclick="setType(this,'business')"><span class="ltab-icon">🏢</span>Business</div>
+        </div>
+
+        <div class="sec-title">Loan Details</div>
+        <div class="field">
+          <div class="field-top">
+            <span class="field-label">Loan Amount</span>
+            <span class="field-val" id="lbl-amt">₹30,00,000</span>
+          </div>
+          <input type="range" id="r-amt" min="50000" max="10000000" step="50000" value="3000000" oninput="syncRange(this,'amt')">
+          <div class="range-labels"><span>₹50K</span><span>₹1 Cr</span></div>
+        </div>
+        <div class="field">
+          <div class="field-top">
+            <span class="field-label">Tenure</span>
+            <span class="field-val" id="lbl-yr">20 yrs</span>
+          </div>
+          <input type="range" id="r-yr" min="1" max="30" step="1" value="20" oninput="syncRange(this,'yr')">
+          <div class="range-labels"><span>1 yr</span><span>30 yrs</span></div>
+        </div>
+        <div class="field">
+          <div class="field-top">
+            <span class="field-label">Interest Rate (p.a.)</span>
+            <span class="field-val" id="lbl-rate">8.50%</span>
+          </div>
+          <input type="range" id="r-rate" min="5" max="24" step="0.05" value="8.5" oninput="syncRange(this,'rate')">
+          <div class="range-labels"><span>5%</span><span>24%</span></div>
+        </div>
+
+        <div class="sec-title" style="margin-top:.2rem">Or Enter Directly</div>
+        <div class="field-direct">
+          <div><label>Principal (₹)</label><input type="number" id="inp-amt" placeholder="3000000" oninput="directInput('amt',this.value)"></div>
+          <div><label>Rate (%)</label><input type="number" id="inp-rate" step="0.05" placeholder="8.5" oninput="directInput('rate',this.value)"></div>
+          <div><label>Years</label><input type="number" id="inp-yr" placeholder="20" oninput="directInput('yr',this.value)"></div>
+          <div><label>Months</label><input type="number" id="inp-mo" placeholder="0" oninput="directInput('mo',this.value)"></div>
+        </div>
+
+        <div class="sec-title" style="margin-top:1rem">Extra Options</div>
+        <div class="extras">
+          <div><label>Repayment Frequency</label>
+            <select id="sel-freq" onchange="calculate()">
+              <option value="12">Monthly</option>
+              <option value="4">Quarterly</option>
+              <option value="2">Half-Yearly</option>
+              <option value="1">Yearly</option>
+            </select>
+          </div>
+          <div><label>Down Payment (₹)</label>
+            <input type="number" id="inp-down" placeholder="0" oninput="calculate()">
+          </div>
+          <div><label>Processing Fee (%)</label>
+            <input type="number" id="inp-fee" step="0.1" placeholder="0.5" value="0.5" oninput="calculate()">
+          </div>
+          <div><label>Insurance / Year (₹)</label>
+            <input type="number" id="inp-ins" placeholder="0" oninput="calculate()">
+          </div>
+        </div>
+
+        <button class="btn-calc" onclick="calculate()">Calculate EMI →</button>
+      </div>
+    </div>
+
+    <!-- RIGHT: RESULTS -->
+    <div>
+      <!-- EMI HERO -->
+      <div class="result-hero">
+        <div class="emi-lbl">Monthly EMI</div>
+        <div class="emi-amount"><span>₹</span><span id="emi-val">26,035</span></div>
+        <div class="emi-period" id="emi-period">for 240 months</div>
+        <div class="stat-row">
+          <div class="stat-box"><div class="stat-v" id="s-principal">₹30L</div><div class="stat-l">Principal</div></div>
+          <div class="stat-box"><div class="stat-v" id="s-interest">₹32.5L</div><div class="stat-l">Total Interest</div></div>
+          <div class="stat-box"><div class="stat-v" id="s-total">₹62.5L</div><div class="stat-l">Total Payment</div></div>
+        </div>
+        <div class="stat-row" style="margin-top:.6rem">
+          <div class="stat-box"><div class="stat-v" id="s-fee">₹15K</div><div class="stat-l">Proc. Fee</div></div>
+          <div class="stat-box"><div class="stat-v" id="s-ins">₹0</div><div class="stat-l">Insurance</div></div>
+          <div class="stat-box"><div class="stat-v" id="s-effective">8.50%</div><div class="stat-l">Eff. Rate</div></div>
+        </div>
+      </div>
+
+      <!-- TABS -->
+      <div class="card">
+        <div class="tabs-nav">
+          <button class="tab-btn active" onclick="switchTab('overview',this)">Overview</button>
+          <button class="tab-btn" onclick="switchTab('banks',this)">Banks (20+)</button>
+          <button class="tab-btn" onclick="switchTab('amort',this)">Schedule</button>
+          <button class="tab-btn" onclick="switchTab('prepay',this)">Prepayment</button>
+          <button class="tab-btn" onclick="switchTab('apply',this)">Apply Now</button>
+        </div>
+
+        <!-- OVERVIEW TAB -->
+        <div class="tab-panel active" id="tab-overview">
+          <div class="chart-row">
+            <div class="donut-wrap">
+              <canvas id="donut" width="140" height="140"></canvas>
+              <div class="donut-center">
+                <div class="donut-pct" id="d-pct">48%</div>
+                <div class="donut-sub">Principal</div>
+              </div>
+            </div>
+            <div class="legend">
+              <div class="leg-item"><div class="leg-dot" style="background:#c84b2f"></div><span>Principal</span><span class="leg-val" id="lg-p">₹30L</span></div>
+              <div class="leg-item"><div class="leg-dot" style="background:#e8843a"></div><span>Interest</span><span class="leg-val" id="lg-i">₹32.5L</span></div>
+              <div class="leg-item"><div class="leg-dot" style="background:#c49a1a"></div><span>Fees+Ins</span><span class="leg-val" id="lg-f">₹15K</span></div>
+            </div>
+          </div>
+          <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border)">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem;font-size:.82rem">
+              <div><span style="color:var(--muted)">Interest : Principal Ratio</span><br><strong id="ip-ratio">1.08 : 1</strong></div>
+              <div><span style="color:var(--muted)">Cost of Credit</span><br><strong id="coc">52.1%</strong></div>
+              <div><span style="color:var(--muted)">Monthly Interest (1st)</span><br><strong id="first-int">₹21,250</strong></div>
+              <div><span style="color:var(--muted)">Break-even Month</span><br><strong id="breakeven">~Month 138</strong></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- BANKS TAB -->
+        <div class="tab-panel" id="tab-banks">
+          <div class="filter-bar">
+            <input type="text" id="bank-search" placeholder="Search bank..." oninput="filterBanks()">
+            <button class="filter-btn active" onclick="filterType(this,'all')">All</button>
+            <button class="filter-btn" onclick="filterType(this,'public')">PSU</button>
+            <button class="filter-btn" onclick="filterType(this,'private')">Private</button>
+            <button class="filter-btn" onclick="filterType(this,'nbfc')">NBFC/HFC</button>
+          </div>
+          <div style="overflow-x:auto">
+          <table class="bank-table" id="bank-table">
+            <thead>
+              <tr>
+                <th>Bank <button class="sort-btn" onclick="sortBanks('name')">⇅</button></th>
+                <th>Rate <button class="sort-btn active" onclick="sortBanks('rate')">⇅</button></th>
+                <th>EMI / mo <button class="sort-btn" onclick="sortBanks('emi')">⇅</button></th>
+                <th>Total Interest</th>
+                <th>Proc. Fee</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="bank-tbody"></tbody>
+          </table>
+          </div>
+        </div>
+
+        <!-- SCHEDULE TAB -->
+        <div class="tab-panel" id="tab-amort">
+          <div class="amort-tabs">
+            <button class="atab active" onclick="showAmort('yearly',this)">Yearly</button>
+            <button class="atab" onclick="showAmort('monthly',this)">Monthly</button>
+            <button class="atab" onclick="showAmort('quarter',this)">Quarterly</button>
+          </div>
+          <div style="overflow-x:auto">
+          <table class="amort-table">
+            <thead><tr><th>Period</th><th>Principal</th><th>Interest</th><th>Balance</th><th class="progress-col">Progress</th></tr></thead>
+            <tbody id="amort-body"></tbody>
+          </table>
+          </div>
+        </div>
+
+        <!-- PREPAYMENT TAB -->
+        <div class="tab-panel" id="tab-prepay">
+          <div style="font-size:.82rem;color:var(--muted);margin-bottom:.8rem">Add lump-sum prepayments to see how they reduce your loan tenure &amp; interest.</div>
+          <div class="prepay-section">
+            <div class="prepay-row">
+              <div><label style="font-size:.7rem;color:var(--muted);display:block;margin-bottom:.2rem">After Month</label><input type="number" id="pp-month" placeholder="12" min="1"></div>
+              <div><label style="font-size:.7rem;color:var(--muted);display:block;margin-bottom:.2rem">Amount (₹)</label><input type="number" id="pp-amt" placeholder="100000"></div>
+              <button class="prepay-add" onclick="addPrepay()">Add</button>
+            </div>
+            <div class="prepay-list" id="pp-list"></div>
+            <div class="savings-box" id="savings-box" style="display:none">
+              <div class="savings-title">💰 Savings with prepayment</div>
+              <div class="savings-grid">
+                <div class="sv"><div class="sv-val" id="sv-months">—</div><div class="sv-lbl">Months saved</div></div>
+                <div class="sv"><div class="sv-val" id="sv-int">—</div><div class="sv-lbl">Interest saved</div></div>
+                <div class="sv"><div class="sv-val" id="sv-newemi">—</div><div class="sv-lbl">New tenure</div></div>
+                <div class="sv"><div class="sv-val" id="sv-roi">—</div><div class="sv-lbl">Effective IRR</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- APPLY TAB -->
+        <div class="tab-panel" id="tab-apply">
+          <div style="font-size:.82rem;color:var(--muted);margin-bottom:1rem">Fill in your details to check eligibility and get a pre-filled application.</div>
+
+          <!-- Eligibility meter -->
+          <div id="elig-wrap" style="margin-bottom:1.2rem;display:none">
+            <div class="elig-row"><span style="font-size:.78rem;font-weight:500">Loan Eligibility Score</span><span id="elig-score" style="font-size:.78rem;font-weight:600;color:var(--green)">0%</span></div>
+            <div class="eligibility-bar"><div class="elig-fill" id="elig-fill" style="width:0%"></div></div>
+            <div id="elig-msg" style="font-size:.75rem;color:var(--muted);margin-top:.3rem"></div>
+          </div>
+
+          <div class="form-grid" id="app-form">
+            <div class="form-section-lbl">Personal Details</div>
+            <div class="form-group">
+              <label>Full Name *</label>
+              <input type="text" id="f-name" placeholder="Ramesh Kumar" oninput="calcElig()">
+            </div>
+            <div class="form-group">
+              <label>Date of Birth *</label>
+              <input type="date" id="f-dob" oninput="calcElig()">
+            </div>
+            <div class="form-group">
+              <label>PAN Number *</label>
+              <input type="text" id="f-pan" placeholder="ABCDE1234F" maxlength="10" oninput="calcElig()">
+            </div>
+            <div class="form-group">
+              <label>Aadhar Number</label>
+              <input type="text" id="f-aadhar" placeholder="XXXX XXXX XXXX" maxlength="14" oninput="fmtAadhar(this)">
+            </div>
+            <div class="form-group">
+              <label>Mobile Number *</label>
+              <input type="tel" id="f-mobile" placeholder="98XXXXXXXX" maxlength="10" oninput="calcElig()">
+            </div>
+            <div class="form-group">
+              <label>Email Address</label>
+              <input type="email" id="f-email" placeholder="name@example.com">
+            </div>
+
+            <div class="form-section-lbl">Employment & Income</div>
+            <div class="form-group">
+              <label>Employment Type *</label>
+              <select id="f-emp" onchange="calcElig()">
+                <option value="">Select...</option>
+                <option>Salaried – Government</option>
+                <option>Salaried – Private</option>
+                <option>Self Employed – Business</option>
+                <option>Self Employed – Professional</option>
+                <option>Pensioner</option>
+                <option>NRI</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Monthly Net Income (₹) *</label>
+              <input type="number" id="f-income" placeholder="75000" oninput="calcElig()">
+            </div>
+            <div class="form-group">
+              <label>Existing EMIs / month (₹)</label>
+              <input type="number" id="f-emi-exist" placeholder="0" oninput="calcElig()">
+            </div>
+            <div class="form-group">
+              <label>CIBIL Score *</label>
+              <select id="f-cibil" onchange="calcElig()">
+                <option value="">Select...</option>
+                <option value="800">750–900 (Excellent)</option>
+                <option value="720">700–749 (Good)</option>
+                <option value="680">650–699 (Fair)</option>
+                <option value="600">Below 650 (Poor)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Work Experience</label>
+              <select id="f-exp">
+                <option>Less than 1 year</option>
+                <option>1–3 years</option>
+                <option>3–5 years</option>
+                <option>More than 5 years</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>State</label>
+              <select id="f-state">
+                <option>Uttar Pradesh</option><option>Maharashtra</option><option>Delhi NCR</option>
+                <option>Karnataka</option><option>Tamil Nadu</option><option>Gujarat</option>
+                <option>West Bengal</option><option>Rajasthan</option><option>Madhya Pradesh</option>
+                <option>Bihar</option><option>Telangana</option><option>Andhra Pradesh</option>
+                <option>Punjab</option><option>Haryana</option><option>Kerala</option>
+                <option>Other</option>
+              </select>
+            </div>
+
+            <div class="form-section-lbl">Loan Preference</div>
+            <div class="form-group">
+              <label>Preferred Bank</label>
+              <select id="f-bank">
+                <option>SBI</option><option>PNB</option><option>Bank of Baroda</option>
+                <option>Bank of India</option><option>Canara Bank</option><option>Union Bank</option>
+                <option>HDFC Bank</option><option>ICICI Bank</option><option>Axis Bank</option>
+                <option>Kotak Mahindra</option><option>Yes Bank</option><option>IDFC First</option>
+                <option>No Preference</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Rate Type</label>
+              <select id="f-ratetype">
+                <option>Floating Rate</option>
+                <option>Fixed Rate</option>
+                <option>No preference</option>
+              </select>
+            </div>
+            <div class="form-group full">
+              <label>Property / Collateral Address (if applicable)</label>
+              <textarea id="f-addr" rows="2" placeholder="Plot no, Street, City, PIN..."></textarea>
+            </div>
+            <div class="form-actions">
+              <button class="btn-submit" onclick="submitApp()">Submit Application →</button>
+              <button class="btn-reset" onclick="resetForm()">Reset</button>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- end card -->
+    </div><!-- end right -->
+  </div><!-- end main-grid -->
+</div><!-- wrap -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+const BANKS=[
+  // PSU Banks
+  {name:"State Bank of India",short:"SBI",type:"public",rate:{home:8.50,car:8.85,personal:12.0,education:8.65,gold:7.5,business:9.5},fee:{home:"0.35%",car:"0.35%",personal:"1%",education:"0%",gold:"0%",business:"0.5%"},badge:"pop"},
+  {name:"Punjab National Bank",short:"PNB",type:"public",rate:{home:8.45,car:8.80,personal:13.0,education:8.55,gold:7.0,business:9.75},fee:{home:"0.35%",car:"0.25%",personal:"1%",education:"0%",gold:"0%",business:"0.5%"},badge:""},
+  {name:"Bank of Baroda",short:"BoB",type:"public",rate:{home:8.40,car:8.70,personal:12.0,education:8.50,gold:7.25,business:9.6},fee:{home:"0.25%",car:"0.25%",personal:"1%",education:"0%",gold:"0%",business:"0.5%"},badge:""},
+  {name:"Bank of India",short:"BOI",type:"public",rate:{home:8.55,car:8.90,personal:12.5,education:8.60,gold:7.5,business:9.8},fee:{home:"0.25%",car:"0.25%",personal:"1%",education:"0%",gold:"0.25%",business:"0.5%"},badge:""},
+  {name:"Canara Bank",short:"Canara",type:"public",rate:{home:8.45,car:8.80,personal:12.75,education:8.50,gold:7.35,business:9.7},fee:{home:"0.5%",car:"0.25%",personal:"1%",education:"0%",gold:"0%",business:"0.5%"},badge:""},
+  {name:"Union Bank of India",short:"Union",type:"public",rate:{home:8.50,car:8.85,personal:12.5,education:8.55,gold:7.4,business:9.75},fee:{home:"0.5%",car:"0.35%",personal:"1%",education:"0%",gold:"0.25%",business:"0.5%"},badge:""},
+  {name:"Indian Bank",short:"Indian Bk",type:"public",rate:{home:8.55,car:8.90,personal:13.0,education:8.60,gold:7.5,business:9.8},fee:{home:"0.25%",car:"0.25%",personal:"1%",education:"0%",gold:"0%",business:"0.5%"},badge:""},
+  {name:"Central Bank of India",short:"CBI",type:"public",rate:{home:8.45,car:8.75,personal:12.75,education:8.55,gold:7.4,business:9.7},fee:{home:"0.25%",car:"0.25%",personal:"1%",education:"0%",gold:"0%",business:"0.5%"},badge:""},
+  {name:"UCO Bank",short:"UCO",type:"public",rate:{home:8.45,car:8.80,personal:13.5,education:8.55,gold:7.5,business:9.85},fee:{home:"0.5%",car:"0.5%",personal:"1%",education:"0%",gold:"0%",business:"0.5%"},badge:""},
+  {name:"Uco / IOB",short:"IOB",type:"public",rate:{home:8.55,car:8.90,personal:13.0,education:8.60,gold:7.5,business:9.9},fee:{home:"0.5%",car:"0.5%",personal:"1%",education:"0%",gold:"0%",business:"0.5%"},badge:""},
+  // Private Banks
+  {name:"HDFC Bank",short:"HDFC",type:"private",rate:{home:8.75,car:9.10,personal:10.75,education:null,gold:null,business:10.5},fee:{home:"0.5%",car:"0.4%",personal:"2%",education:"—",gold:"—",business:"1%"},badge:"pvt"},
+  {name:"ICICI Bank",short:"ICICI",type:"private",rate:{home:8.75,car:9.00,personal:10.99,education:null,gold:null,business:10.75},fee:{home:"0.5%",car:"0.4%",personal:"2%",education:"—",gold:"—",business:"1%"},badge:"pvt"},
+  {name:"Axis Bank",short:"Axis",type:"private",rate:{home:8.90,car:9.20,personal:11.25,education:null,gold:9.0,business:11.0},fee:{home:"1%",car:"0.5%",personal:"2%",education:"—",gold:"1%",business:"1%"},badge:""},
+  {name:"Kotak Mahindra Bank",short:"Kotak",type:"private",rate:{home:8.85,car:9.15,personal:10.99,education:null,gold:null,business:11.0},fee:{home:"0.5%",car:"0.5%",personal:"2%",education:"—",gold:"—",business:"1%"},badge:""},
+  {name:"Yes Bank",short:"Yes",type:"private",rate:{home:9.15,car:9.75,personal:11.99,education:null,gold:null,business:11.5},fee:{home:"1%",car:"0.75%",personal:"2%",education:"—",gold:"—",business:"1%"},badge:""},
+  {name:"IDFC First Bank",short:"IDFC",type:"private",rate:{home:8.85,car:9.25,personal:10.99,education:null,gold:null,business:11.25},fee:{home:"0.5%",car:"0.5%",personal:"1.5%",education:"—",gold:"—",business:"1%"},badge:""},
+  {name:"IndusInd Bank",short:"IndusInd",type:"private",rate:{home:8.75,car:9.00,personal:11.0,education:null,gold:9.5,business:11.0},fee:{home:"0.5%",car:"0.5%",personal:"2%",education:"—",gold:"1%",business:"1%"},badge:""},
+  {name:"Federal Bank",short:"Federal",type:"private",rate:{home:8.80,car:9.15,personal:11.49,education:9.00,gold:8.5,business:11.25},fee:{home:"0.5%",car:"0.5%",personal:"1.5%",education:"0%",gold:"0.5%",business:"1%"},badge:""},
+  // NBFCs / HFCs
+  {name:"LIC Housing Finance",short:"LIC HFL",type:"nbfc",rate:{home:8.50,car:null,personal:null,education:null,gold:null,business:null},fee:{home:"0.25%",car:"—",personal:"—",education:"—",gold:"—",business:"—"},badge:""},
+  {name:"HDFC Ltd (HFC)",short:"HDFC Ltd",type:"nbfc",rate:{home:8.70,car:null,personal:null,education:null,gold:null,business:null},fee:{home:"0.5%",car:"—",personal:"—",education:"—",gold:"—",business:"—"},badge:""},
+  {name:"Bajaj Finserv",short:"Bajaj",type:"nbfc",rate:{home:null,car:null,personal:11.0,education:null,gold:null,business:12.0},fee:{home:"—",car:"—",personal:"2%",education:"—",gold:"—",business:"1.5%"},badge:""},
+  {name:"Tata Capital",short:"Tata Cap",type:"nbfc",rate:{home:8.95,car:9.35,personal:11.5,education:null,gold:null,business:12.0},fee:{home:"0.5%",car:"0.5%",personal:"2%",education:"—",gold:"—",business:"1.5%"},badge:""},
+];
+
+let loanType="home", P=3000000, Y=20, rate=8.5;
+let amortMode="yearly", sortField="rate", sortAsc=true;
+let bankFilter="all", bankSearch="", prepayments=[];
+
+function fmt(n){
+  if(n>=10000000) return "₹"+(n/10000000).toFixed(2)+"Cr";
+  if(n>=100000) return "₹"+(n/100000).toFixed(2)+"L";
+  return "₹"+Math.round(n).toLocaleString('en-IN');
+}
+function emiCalc(p,r,n){
+  let rm=r/12/100;
+  if(rm===0) return p/n;
+  return p*rm*Math.pow(1+rm,n)/(Math.pow(1+rm,n)-1);
+}
+function updateSliderBg(el){
+  const min=parseFloat(el.min),max=parseFloat(el.max),val=parseFloat(el.value);
+  const pct=((val-min)/(max-min))*100;
+  el.style.setProperty('--pct',pct+'%');
+}
+
+function syncRange(el,t){
+  updateSliderBg(el);
+  if(t==="amt"){P=parseFloat(el.value);document.getElementById("lbl-amt").textContent="₹"+Math.round(P).toLocaleString('en-IN')}
+  if(t==="yr"){Y=parseInt(el.value);document.getElementById("lbl-yr").textContent=el.value+" yrs"}
+  if(t==="rate"){rate=parseFloat(el.value);document.getElementById("lbl-rate").textContent=parseFloat(el.value).toFixed(2)+"%"}
+  calculate();
+}
+function directInput(t,v){
+  const n=parseFloat(v);
+  if(isNaN(n)||n<=0)return;
+  if(t==="amt"){P=n;document.getElementById("r-amt").value=Math.min(Math.max(n,50000),10000000);updateSliderBg(document.getElementById("r-amt"));document.getElementById("lbl-amt").textContent="₹"+Math.round(P).toLocaleString('en-IN')}
+  if(t==="rate"){rate=n;document.getElementById("r-rate").value=Math.min(Math.max(n,5),24);updateSliderBg(document.getElementById("r-rate"));document.getElementById("lbl-rate").textContent=n.toFixed(2)+"%"}
+  if(t==="yr"){
+    let mo=parseInt(document.getElementById("inp-mo").value)||0;
+    Y=(n)+(mo/12);
+    document.getElementById("r-yr").value=Math.min(Math.max(Math.round(Y),1),30);updateSliderBg(document.getElementById("r-yr"));
+    document.getElementById("lbl-yr").textContent=Math.round(Y)+" yrs";
+  }
+  if(t==="mo"){
+    let yr=parseInt(document.getElementById("inp-yr").value)||20;
+    Y=yr+(n/12);
+    document.getElementById("lbl-yr").textContent=yr+"y "+Math.round(n)+"m";
+  }
+  calculate();
+}
+
+function setType(el,t){
+  document.querySelectorAll(".ltab").forEach(x=>x.classList.remove("active"));
+  el.classList.add("active");
+  loanType=t;
+  const defaults={home:{amt:3000000,yr:20,rate:8.5},car:{amt:800000,yr:7,rate:9.0},personal:{amt:500000,yr:5,rate:11.0},education:{amt:1000000,yr:10,rate:8.65},gold:{amt:200000,yr:2,rate:7.5},business:{amt:2000000,yr:5,rate:9.5}};
+  const d=defaults[t];
+  P=d.amt;Y=d.yr;rate=d.rate;
+  ["r-amt","r-yr","r-rate"].forEach(id=>{
+    const el=document.getElementById(id);
+    el.value=id==="r-amt"?P:id==="r-yr"?Y:rate;
+    updateSliderBg(el);
+  });
+  document.getElementById("lbl-amt").textContent="₹"+Math.round(P).toLocaleString('en-IN');
+  document.getElementById("lbl-yr").textContent=Y+" yrs";
+  document.getElementById("lbl-rate").textContent=rate.toFixed(2)+"%";
+  calculate();
+}
+
+function calculate(){
+  const freq=parseInt(document.getElementById("sel-freq").value)||12;
+  const down=parseFloat(document.getElementById("inp-down").value)||0;
+  const feePct=parseFloat(document.getElementById("inp-fee").value)||0;
+  const insYear=parseFloat(document.getElementById("inp-ins").value)||0;
+  const principal=P-down;
+  const N=Math.round(Y*12);
+  const e=emiCalc(principal,rate,N);
+  const totalPay=e*N, totalInt=totalPay-principal;
+  const procFee=principal*(feePct/100);
+  const totalIns=insYear*Y;
+  const effectiveRate=rate; // simplified
+  document.getElementById("emi-val").textContent=Math.round(e).toLocaleString('en-IN');
+  document.getElementById("emi-period").textContent="for "+N+" months";
+  document.getElementById("s-principal").textContent=fmt(principal);
+  document.getElementById("s-interest").textContent=fmt(totalInt);
+  document.getElementById("s-total").textContent=fmt(totalPay+procFee+totalIns);
+  document.getElementById("s-fee").textContent=fmt(procFee);
+  document.getElementById("s-ins").textContent=fmt(totalIns);
+  document.getElementById("s-effective").textContent=effectiveRate.toFixed(2)+"%";
+  // overview stats
+  const pp=Math.round(principal/totalPay*100),ip=100-pp;
+  document.getElementById("d-pct").textContent=pp+"%";
+  document.getElementById("lg-p").textContent=fmt(principal);
+  document.getElementById("lg-i").textContent=fmt(totalInt);
+  document.getElementById("lg-f").textContent=fmt(procFee+totalIns);
+  document.getElementById("ip-ratio").textContent=(totalInt/principal).toFixed(2)+" : 1";
+  document.getElementById("coc").textContent=((totalInt/principal)*100).toFixed(1)+"%";
+  const firstInt=principal*(rate/12/100);
+  document.getElementById("first-int").textContent=fmt(firstInt);
+  // break-even: month when principal paid > interest paid
+  let bal2=principal,cumPI=0,cumII=0,bMonth=N;
+  for(let m=1;m<=N;m++){const ip2=bal2*(rate/12/100),pp2=e-ip2;cumPI+=pp2;cumII+=ip2;bal2-=pp2;if(cumPI>=cumII&&bMonth===N){bMonth=m;break;}}
+  document.getElementById("breakeven").textContent="~Month "+bMonth;
+  drawDonut(pp,ip,procFee+totalIns>0?Math.round((procFee+totalIns)/totalPay*5):0);
+  buildBankTable();
+  buildAmort();
+  calcPrepaymentSavings();
+}
+
+function drawDonut(pp,ip,fp=0){
+  const c=document.getElementById("donut"),ctx=c.getContext("2d");
+  const cx=70,cy=70,r=58,lw=16;
+  ctx.clearRect(0,0,140,140);
+  const slices=[{v:pp,col:"#c84b2f"},{v:ip-fp,col:"#e8843a"},{v:fp,col:"#c49a1a"}].filter(s=>s.v>0);
+  let start=-Math.PI/2;
+  slices.forEach(s=>{
+    const angle=(s.v/100)*2*Math.PI;
+    ctx.beginPath();ctx.arc(cx,cy,r,start,start+angle);
+    ctx.strokeStyle=s.col;ctx.lineWidth=lw;ctx.lineCap="butt";ctx.stroke();
+    start+=angle;
+  });
+  // inner ring
+  ctx.beginPath();ctx.arc(cx,cy,r-lw/2-4,0,2*Math.PI);ctx.strokeStyle="#f0ece6";ctx.lineWidth=1;ctx.stroke();
+}
+
+// ---- BANK TABLE ----
+function buildBankTable(){
+  const tbody=document.getElementById("bank-tbody");
+  tbody.innerHTML="";
+  let rows=BANKS.filter(b=>{
+    if(!b.rate[loanType]||b.rate[loanType]===null)return false;
+    if(bankFilter!=="all"&&b.type!==bankFilter)return false;
+    if(bankSearch&&!b.name.toLowerCase().includes(bankSearch.toLowerCase())&&!b.short.toLowerCase().includes(bankSearch.toLowerCase()))return false;
+    return true;
+  });
+  const N=Math.round(Y*12),principal=P-(parseFloat(document.getElementById("inp-down").value)||0);
+  rows=rows.map(b=>({...b,e:emiCalc(principal,b.rate[loanType],N),ti:emiCalc(principal,b.rate[loanType],N)*N-principal}));
+  rows.sort((a,b2)=>{
+    let av=sortField==="name"?a.name:sortField==="rate"?a.rate[loanType]:a.e;
+    let bv=sortField==="name"?b2.name:sortField==="rate"?b2.rate[loanType]:b2.e;
+    return sortAsc?(av>bv?1:-1):(av<bv?1:-1);
+  });
+  const minE=Math.min(...rows.map(r=>r.e));
+  rows.forEach(b=>{
+    const isBest=Math.abs(b.e-minE)<1;
+    const barW=Math.round((minE/b.e)*100);
+    const saving=b.e-minE;
+    const tr=document.createElement("tr");
+    if(isBest)tr.className="best";
+    tr.innerHTML=`
+      <td><span class="bank-name">${b.name}
+        ${b.badge==="pop"?'<span class="badge badge-pop">Popular</span>':''}
+        ${b.badge==="pvt"?'<span class="badge badge-pvt">Private</span>':''}
+        ${isBest?'<span class="badge badge-best">Best Rate</span>':''}
+      </span><span class="bank-type">${b.type==="public"?"PSU Bank":b.type==="private"?"Private Bank":"NBFC/HFC"}</span></td>
+      <td><strong>${b.rate[loanType].toFixed(2)}%</strong></td>
+      <td><strong>₹${Math.round(b.e).toLocaleString('en-IN')}</strong>
+        <div class="emi-bar"><div class="emi-bar-fill" style="width:${barW}%"></div></div>
+        ${saving>1?'<div class="saving">+₹'+Math.round(saving).toLocaleString('en-IN')+'/mo vs best</div>':''}
+      </td>
+      <td>${fmt(b.ti)}</td>
+      <td>${b.fee[loanType]}</td>
+      <td><button class="apply-btn" onclick="prefillBank('${b.name}')">Apply</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+function filterBanks(){bankSearch=document.getElementById("bank-search").value;buildBankTable()}
+function filterType(el,t){bankFilter=t;document.querySelectorAll(".filter-btn").forEach(x=>x.classList.remove("active"));el.classList.add("active");buildBankTable()}
+function sortBanks(f){if(sortField===f)sortAsc=!sortAsc;else{sortField=f;sortAsc=true;}document.querySelectorAll(".sort-btn").forEach(x=>x.classList.remove("active"));buildBankTable()}
+function prefillBank(name){
+  document.getElementById("f-bank").value=name;
+  switchTab("apply",document.querySelector('.tab-btn:last-child'));
+  showToast("Bank set to "+name+". Fill the form to apply.");
+}
+
+// ---- AMORT ----
+let amortData=[];
+function buildAmort(){
+  const N=Math.round(Y*12),rm=rate/12/100,e=emiCalc(P,rate,N);
+  amortData=[];
+  let bal=P;
+  for(let m=1;m<=N;m++){
+    const ip=bal*rm,pp=e-ip;
+    bal=Math.max(0,bal-pp);
+    amortData.push({m,ip,pp,bal,cumP:P-bal,cumI:(e*m)-(P-bal)});
+  }
+  renderAmort();
+}
+function renderAmort(){
+  const tbody=document.getElementById("amort-body");
+  tbody.innerHTML="";
+  const N=Math.round(Y*12);
+  if(amortMode==="yearly"){
+    for(let yr=1;yr<=Math.ceil(N/12);yr++){
+      const slice=amortData.slice((yr-1)*12,yr*12);
+      if(!slice.length)continue;
+      const tp=slice.reduce((a,x)=>a+x.pp,0);
+      const ti=slice.reduce((a,x)=>a+x.ip,0);
+      const bal=slice[slice.length-1].bal;
+      const prog=Math.round(((P-bal)/P)*100);
+      const tr=document.createElement("tr");
+      tr.innerHTML=`<td>Year ${yr}</td><td style="text-align:right">${fmt(tp)}</td><td style="text-align:right">${fmt(ti)}</td><td style="text-align:right">${fmt(bal)}</td><td><div class="mini-bar"><div class="mini-fill" style="width:${prog}%"></div></div><span style="font-size:.68rem;color:var(--muted)">${prog}%</span></td>`;
+      tbody.appendChild(tr);
+    }
+  } else if(amortMode==="monthly"){
+    amortData.slice(0,24).forEach(d=>{
+      const prog=Math.round((d.cumP/P)*100);
+      const tr=document.createElement("tr");
+      tr.innerHTML=`<td>Month ${d.m}</td><td style="text-align:right">${fmt(d.pp)}</td><td style="text-align:right">${fmt(d.ip)}</td><td style="text-align:right">${fmt(d.bal)}</td><td><div class="mini-bar"><div class="mini-fill" style="width:${prog}%"></div></div><span style="font-size:.68rem;color:var(--muted)">${prog}%</span></td>`;
+      tbody.appendChild(tr);
+    });
+  } else {
+    for(let q=0;q<Math.ceil(amortData.length/3);q++){
+      const slice=amortData.slice(q*3,(q+1)*3);
+      if(!slice.length)continue;
+      const tp=slice.reduce((a,x)=>a+x.pp,0);
+      const ti=slice.reduce((a,x)=>a+x.ip,0);
+      const bal=slice[slice.length-1].bal;
+      const prog=Math.round(((P-bal)/P)*100);
+      const tr=document.createElement("tr");
+      tr.innerHTML=`<td>Q${q+1}</td><td style="text-align:right">${fmt(tp)}</td><td style="text-align:right">${fmt(ti)}</td><td style="text-align:right">${fmt(bal)}</td><td><div class="mini-bar"><div class="mini-fill" style="width:${prog}%"></div></div><span style="font-size:.68rem;color:var(--muted)">${prog}%</span></td>`;
+      tbody.appendChild(tr);
+    }
+  }
+  // Total row
+  const tr=document.createElement("tr");
+  const totalP=amortData.reduce((a,x)=>a+x.pp,0);
+  const totalI=amortData.reduce((a,x)=>a+x.ip,0);
+  tr.innerHTML=`<td>Total</td><td style="text-align:right">${fmt(totalP)}</td><td style="text-align:right">${fmt(totalI)}</td><td style="text-align:right">₹0</td><td></td>`;
+  tbody.appendChild(tr);
+}
+function showAmort(mode,el){
+  amortMode=mode;
+  document.querySelectorAll(".atab").forEach(x=>x.classList.remove("active"));
+  el.classList.add("active");
+  renderAmort();
+}
+
+// ---- PREPAYMENT ----
+function addPrepay(){
+  const mo=parseInt(document.getElementById("pp-month").value);
+  const amt=parseFloat(document.getElementById("pp-amt").value);
+  if(!mo||!amt||mo<1||amt<1){showToast("Enter valid month and amount.");return;}
+  prepayments.push({mo,amt});
+  prepayments.sort((a,b)=>a.mo-b.mo);
+  renderPrepays();
+  calcPrepaymentSavings();
+}
+function removePrepay(i){prepayments.splice(i,1);renderPrepays();calcPrepaymentSavings();}
+function renderPrepays(){
+  const div=document.getElementById("pp-list");
+  div.innerHTML="";
+  prepayments.forEach((p,i)=>{
+    const d=document.createElement("div");
+    d.className="prepay-item";
+    d.innerHTML=`<span>After Month <strong>${p.mo}</strong></span><span>₹${Math.round(p.amt).toLocaleString('en-IN')}</span><button class="prepay-del" onclick="removePrepay(${i})">✕</button>`;
+    div.appendChild(d);
+  });
+}
+function calcPrepaymentSavings(){
+  if(!prepayments.length){document.getElementById("savings-box").style.display="none";return;}
+  const N=Math.round(Y*12),rm=rate/12/100,e=emiCalc(P,rate,N);
+  const origInt=e*N-P;
+  // simulate with prepayments
+  let bal=P,m=0,newInt=0;
+  const ppMap={};prepayments.forEach(p=>{ppMap[p.mo]=(ppMap[p.mo]||0)+p.amt;});
+  while(bal>0&&m<N*2){
+    m++;
+    const ip=bal*rm;const pp=e-ip;
+    newInt+=ip;bal-=pp;
+    if(ppMap[m])bal=Math.max(0,bal-ppMap[m]);
+    if(bal<=0)break;
+  }
+  const saved=origInt-newInt;const monthsSaved=N-m;
+  document.getElementById("savings-box").style.display="";
+  document.getElementById("sv-months").textContent=Math.max(0,monthsSaved)+" months";
+  document.getElementById("sv-int").textContent=fmt(Math.max(0,saved));
+  document.getElementById("sv-newemi").textContent=m+" months";
+  document.getElementById("sv-roi").textContent=((saved/prepayments.reduce((a,x)=>a+x.amt,0))*100).toFixed(1)+"% return";
+}
+
+// ---- LOAN APPLICATION ----
+function calcElig(){
+  const name=document.getElementById("f-name").value.trim();
+  const dob=document.getElementById("f-dob").value;
+  const pan=document.getElementById("f-pan").value.trim();
+  const mobile=document.getElementById("f-mobile").value.trim();
+  const emp=document.getElementById("f-emp").value;
+  const income=parseFloat(document.getElementById("f-income").value)||0;
+  const emiExist=parseFloat(document.getElementById("f-emi-exist").value)||0;
+  const cibil=parseInt(document.getElementById("f-cibil").value)||0;
+  let score=0,msgs=[];
+  if(name.length>=3)score+=15;
+  if(dob){const age=new Date().getFullYear()-new Date(dob).getFullYear();if(age>=21&&age<=60)score+=15;else msgs.push("Age should be 21–60.")}
+  if(/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(pan.toUpperCase()))score+=20;else if(pan.length)msgs.push("Invalid PAN format.");
+  if(/^\d{10}$/.test(mobile))score+=10;
+  if(emp)score+=10;
+  const foir=(emiCalc(P,rate,Math.round(Y*12))+emiExist)/income*100;
+  if(income>0){if(foir<50)score+=20;else if(foir<65)score+=10;else msgs.push("FOIR is high ("+foir.toFixed(0)+"%). Reduce existing EMIs.");}
+  if(cibil>=800)score+=10;else if(cibil>=720)score+=7;else if(cibil>=680)score+=3;else if(cibil>0)msgs.push("Low CIBIL score may affect approval.");
+  const pct=Math.min(score,100);
+  document.getElementById("elig-wrap").style.display="block";
+  document.getElementById("elig-score").textContent=pct+"%";
+  const fill=document.getElementById("elig-fill");
+  fill.style.width=pct+"%";
+  fill.style.background=pct>=75?"#1a7a4a":pct>=50?"#c49a1a":"#c84b2f";
+  document.getElementById("elig-msg").textContent=msgs.slice(0,2).join(" ")||(pct>=75?"Good eligibility! You may qualify for this loan.":pct>=50?"Moderate eligibility. Improving CIBIL score will help.":"Improve your profile before applying.");
+}
+
+function fmtAadhar(el){
+  let v=el.value.replace(/\D/g,'').slice(0,12);
+  el.value=v.match(/.{1,4}/g)?.join(' ')||v;
+}
+
+function submitApp(){
+  const name=document.getElementById("f-name").value.trim();
+  const pan=document.getElementById("f-pan").value.trim();
+  const mobile=document.getElementById("f-mobile").value.trim();
+  if(!name){showToast("Please enter your name.");return;}
+  if(!/^[A-Z]{5}[0-9]{4}[A-Z]$/i.test(pan)){showToast("Please enter a valid PAN number.");return;}
+  if(!/^\d{10}$/.test(mobile)){showToast("Please enter a valid 10-digit mobile number.");return;}
+  showToast("✅ Application submitted! Bank will contact you within 2 working days.");
+}
+function resetForm(){
+  document.querySelectorAll("#app-form input, #app-form select, #app-form textarea").forEach(el=>el.value="");
+  document.getElementById("elig-wrap").style.display="none";
+}
+
+// ---- TABS ----
+function switchTab(id,el){
+  document.querySelectorAll(".tab-panel").forEach(x=>x.classList.remove("active"));
+  document.querySelectorAll(".tab-btn").forEach(x=>x.classList.remove("active"));
+  document.getElementById("tab-"+id).classList.add("active");
+  el.classList.add("active");
+}
+
+// ---- TOAST ----
+function showToast(msg){
+  const t=document.getElementById("toast");
+  t.textContent=msg;t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"),3500);
+}
+
+// Init
+["r-amt","r-yr","r-rate"].forEach(id=>updateSliderBg(document.getElementById(id)));
+calculate();
+</script>
+</body>
+</html>
